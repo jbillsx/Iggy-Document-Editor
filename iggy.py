@@ -36,6 +36,9 @@ class Blip:
     blipid="B+!1234"
     text="DEMO TEXT"
     docid=""
+    user=""
+    def setus(self,name):
+        self.user=name
     def setid(self,strvar):
         self.blipid=strvar
     def setdocid(self,newdoc):
@@ -74,7 +77,8 @@ while 1:
                     if newdata[1]=="GET":
                             for blip in blipnew:
                                 if blip.blipid==newdata[2]:
-                                    UDPSock.sendto(blip.text,addr)
+                                    if blip.user!=newdata[3]:
+                                        UDPSock.sendto(blip.text,addr)
                     if newdata[1]=="LIST":
                         for blip in blipnew:
                             if blip.docid==newdata[2]:
@@ -89,7 +93,7 @@ while 1:
                                 number=number+1
                                 
                         print number
-                        UDPSock.sendto(number,addr)
+                        UDPSock.sendto(str(number),addr)
                     if newdata[1]=="ADD":
                         i2+=1
                         blipnew.append(Blip())
@@ -101,7 +105,9 @@ while 1:
                     if newdata[1]=="UPDATE":
                         for blip in blipnew:
                             if blip.blipid==newdata[2]:
-                                blip.settext(newdata[3])
+                                blip.setus(newdata[4])
+                                main=newdata[3].split("\"")
+                                blip.settext(main[2])
                                 print "\nchanged text to '"+newdata[3]+"'"
                                 UDPSock.sendto("done",addr)
                                 

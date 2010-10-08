@@ -3,6 +3,8 @@
 <script type="text/javascript">
 var Docids;
 var Blipid;
+var user;
+var currentedit;
 function NewDoc()
 {
 if (window.XMLHttpRequest)
@@ -44,7 +46,6 @@ xmlhttp.onreadystatechange=function()
     document.getElementById("Status").innerHTML=xmlhttp.responseText;
     }
   }
-
 xmlhttp.open("POST","sock.php",true);
 xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 xmlhttp.send("message=BLIP:ADD:"+Docids);
@@ -66,23 +67,94 @@ xmlhttp.onreadystatechange=function()
     {
     document.getElementById("Status").innerHTML=xmlhttp.responseText;
     Blipid=xmlhttp.responseText.split(":");
-    document.getElementById("Bliplist").innerHTML=Blipid[1]+"   "+Blipid[0];
+    document.getElementById("Bliplist").innerHTML=Blipid[1]+"   "+Blipid[0]+" <a
+ href=\"#\" onclick=switchedit(\""+Blipid[1]+"\")>edit</a>";
     }
   }
+
 xmlhttp.open("POST","blips.php",true);
 xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 xmlhttp.send("Docid="+Docids);
 }
+function switchedit(edit)
+{
+var x;
+var z=0;
+for (x in Blipid)
+{
+if(z%2!=0)
+{
+if(edit==Blipid[z])
+{
+document.getElementById("editing").value=Blipid[z-1];
+currentedit=Blipid[z];
+setInterval( "update()", 1500 );
+}
+}
+z++;
+}
+}
+
+function changeuser(username)
+{
+user=username;
+}
+function post()
+{
+if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+  xmlhttp=new XMLHttpRequest();
+  }
+else
+  {// code for IE6, IE5
+  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+xmlhttp.open("POST","sock.php",true);
+xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+xmlhttp.send("message=BLIP:UPDATE:"+currentedit+":"+"\""+document.getElementById
+("editing").value+"\":"+user);
+}
+
+function update()
+{
+if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+
+  xmlhttp=new XMLHttpRequest();
+  }
+else
+  {// code for IE6, IE5
+  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+
+xmlhttp.onreadystatechange=function()
+  {
+  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+    {
+    document.getElementById("editing").value=xmlhttp.responseText;
+    }
+  }
+xmlhttp.open("POST","upd.php",true);
+xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+xmlhttp.send("message=BLIP:GET:"+currentedit+":"+user);
+}
+
 </script>
 </head>
 <body>
-
+<input type="text" id="username"><button type="button" onclick=changeuser(docume
+nt.getElementById("username").value);>Login</button>
+<p>
 <button type="button" onclick="NewDoc();">New Doc</button>
 <button type="button" onclick="ListBlips()">List Blips</button>
 <br>
 <button type="button" onclick="NewBlip()">New Blip</button>
 <div id="Bliplist"></div>
 <p>
+<div id="press" >
+<textarea id="editing"  onKeyPress="post()"></textarea>
+</div>
+<p><p><p>
 <div id="Status"></div>
 </body>
 </html>
